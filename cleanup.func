@@ -1,0 +1,18 @@
+function cleanup() {
+    echo "cleaning up empty directories..."
+    find . -type d -empty -delete
+    echo "cleaning up .@__* directories ..."
+    find . -iname ".@__*" -exec xargs rm -Rf {} \;
+    echo "cleaning up sample-files..."
+    find . -type f -iname "*sample*" -delete
+    echo "cleaning up proofs..."
+    find . -type d -iname "*proof" | xargs rm -Rf
+    echo "cleaning up checksum-files..."
+    find . -iname "*.sfv" -delete
+    echo "cleaning up info-files..."
+    find . -iname "*.nfo" -delete
+    echo "cleaning up url-files..."
+    find . -iname "*.url" -delete
+    echo "cleaning up sample directories..."
+    find . -type d -iname "*sample*" -delete
+}

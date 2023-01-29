@@ -1,0 +1,4 @@
+function findrars() {
+    find . -type f -name "*.rar" | awk -F/ '{print $2}' | sort | uniq
+}
+

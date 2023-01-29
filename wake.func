@@ -1,0 +1,24 @@
+#!/bin/bash
+
+function wake() {
+    case ${1} in
+        600g1)
+            sudo etherwake 8c:dc:d4:4a:3b:27 # prodesk 600 G1
+        ;;
+        nas2|ts-251)
+            sudo etherwake 00:08:9B:EE:99:CA #QNAP TS-251
+        ;;
+        8200)
+            sudo etherwake 74:46:A0:91:9B:AA # Elite 8200 MT
+        ;;
+        *)
+            RSLT="$(echo "${1}" | grep -Eq "^([[:xdigit:]]{2}[:.-]?){5}[[:xdigit:]]{2}$"; echo $?)"
+            if [ "$RSLT" != "0" ]
+                then
+                    echo provided string does not match a valid mac address format
+                else
+                    sudo etherwake  ${1}
+            fi
+        ;;
+    esac
+}

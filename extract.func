@@ -1,0 +1,123 @@
+function extract() {
+    # wait if another extraction is already running
+    while [ "$(ps -ef | grep 7z | grep -v grep | wc -l )" -eq 1 ]
+    do
+        echo "another extraction is in progress. waiting for it to finish"
+        sleep 1m
+    done
+    
+    # check what to extract
+    firstPartCount=$(ls --color=never *.rar | egrep -I "t0{0,4}1.rar" | wc -l)
+    #firstPartCount=$(ls --color=never *.rar | egrep -I t0\?0\?0\?0\?1.rar | wc -l)
+    #singlePartArchivesCount=$(ls --color=never *.rar | egrep -vI *part[0-9]\?[0-9]\?[0-9]\?[0-9]\?[0-9].rar | wc -l)
+    singlePartArchivesCount=$(ls --color=never *.rar | egrep -vI "*part[0-9]{0,5}.rar" | wc -l)
+
+    # extract all mutli part archives
+    if [ $firstPartCount -ne 0 ]
+    then
+        firstPart=$(ls --color=never *.rar | egrep -I t0\?0\?1.rar)
+        # check which password should be used in extractions
+        for file in ${=firstPart}
+        do
+            if [ -z "$PASSWORD" ]
+            then
+                testpassword $file
+            fi
+            # check if files are located in archive
+            dia=$(7z l -p${PASSWORD} $file | grep mkv | awk '{print $NF}' | grep '/' | head -n1)
+            #dia=$(unrar l -p${PASSWORD} $file | grep mkv | awk '{print $NF}' | grep '/' | head -n1)
+            FILENAME=$(echo $file | sed -e 's#part0\?0\?1.rar#part\*.rar#g')
+            7z x -aoa -p"${PASSWORD}" $file
+            # break
+            STATUS=$?
+            if [ $STATUS -eq 0 ]
+            then
+                find . -type f -name $FILENAME | xargs rm
+            fi
+            if [ $firstPartCount -gt 1 ]
+            then
+                countdown 45
+            fi
+            # if [ -n "$dia" ]
+            # then
+            #     #dirname=$(echo $dia | cut -d \/ -f1)
+            #     #mv $dirname/* . && rm -R $dirname
+            #     subDirs=$(find . -mindepth $(( $(echo $dia | grep -c /) + 1 )) -maxdepth $(( $(echo $dia | grep -c /) + 1 )) -type d)
+            #     uniqSubDirs=$(find . -mindepth $(( $(echo $dia | grep -c /) + 1 )) -maxdepth $(( $(echo $dia | grep -c /) + 1 )) -type d | awk -F / '{print $NF}' | sort | uniq)
+                
+            #     for uniqDirectory in ${=uniqSubDirs}
+            #     do
+            #         mkdir $uniqDirectory
+            #     done
+
+            #     for subDirectory in ${=subDirs}
+            #     do
+            #         # echo $subDirectory
+            #         mv $subDirectory/* $(echo $subDirectory | awk -F/ '{print $NF}')
+            #     done
+
+            #     files=$(find . -type f ! -iwholename "*subs*" ! -iwholename "*sample*" ! -iwholename "*proof*" ! -iwholename "*rar")
+            #     for file in ${=files}
+            #     do
+            #         # echo $subDirectory
+            #         mv $file .
+            #     done
+            # fi
+        done
+    fi
+    
+    # extract all single part archives
+    if [ $singlePartArchivesCount -gt 0 ]
+    then
+        singlePartArchives=$(ls --color=never *.rar | egrep -vI "*part[0-9]{0,5}.rar")
+        for file in ${=singlePartArchives}
+        do
+            # check which password should be used in extractions
+            testpassword $file
+            # check if files are located in archive
+            dia=$(7z l -p${PASSWORD} $file | grep mkv | awk '{print $NF}' | grep '/' | head -n1)
+            FILENAME=$(echo $file | sed -e 's#part0\?0\?1.rar#part\*.rar#g')
+            7z x -aoa -p"${PASSWORD}" $file
+            # break
+            STATUS=$?
+            if [ $STATUS -eq 0 ]
+            then
+                    find . -type f -name $FILENAME | xargs rm
+            fi
+            if [ $singlePartArchivesCount -gt 1 ]
+            then
+                    countdown 45
+            fi
+            # if [ -n "$dia" ]
+            # then
+            #     #dirname=$(echo $dia | cut -d \/ -f1)
+            #     #mv $dirname/* . && rm -R $dirname
+            #     subDirs=$(find . -mindepth $(( $(echo $dia | grep -c /) + 1 )) -maxdepth $(( $(echo $dia | grep -c /) + 1 )) -type d)
+            #     uniqSubDirs=$(find . -mindepth $(( $(echo $dia | grep -c /) + 1 )) -maxdepth $(( $(echo $dia | grep -c /) + 1 )) -type d | awk -F / '{print $NF}' | sort | uniq)
+                
+            #     for uniqDirectory in ${=uniqSubDirs}
+            #     do
+            #         mkdir $uniqDirectory
+            #     done
+
+            #     for subDirectory in ${=subDirs}
+            #     do
+            #         # echo $subDirectory
+            #         mv $subDirectory/* $(echo $subDirectory | awk -F/ '{print $NF}')
+            #     done
+
+            #     files=$(find . -mindepth 2 -type f ! -iwholename "*subs*" ! -iwholename "*sample*" ! -iwholename "*proof*" ! -iwholename "*rar" ! -iwholename "*nfo")
+            #     for file in ${=files}
+            #     do
+            #         # echo $subDirectory
+            #         mv $file .
+            #     done
+            # fi
+        done
+    fi
+    unset PASSWORD
+    # delete all files containing "sample"
+    find . -iname "*sample*" -o -iname "*.nfo" -delete -o -iname "*.url"
+    find . -type d -empty -delete
+}
+

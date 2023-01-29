@@ -1,0 +1,31 @@
+#!/bin/bash
+
+if [ "$EUID" -ne 0 ]
+    then
+        echo Script has to be run as root or with sudo
+        exit 1
+fi
+
+if [ $(which dnf) ]
+    then
+        echo found dnf
+        dnf update
+elif [ $(which yum) ]
+    then
+        echo found yum
+        yum update
+elif [ $(which apt) ]
+    then
+        echo found apt
+        apt update
+        apt upgrade
+elif [ $(which pacman) ]
+    then
+        echo found pacman
+        pacman -Syu
+fi
+
+if [ $(which flatpak) ]
+    then
+        sudo -u $USERNAME flatpak update
+fi

@@ -1,0 +1,21 @@
+function countdown() {
+    waitFor=$1
+    echo -n "waiting "
+    while [ $waitFor != 0 ]
+    do
+        case $waitFor in
+        *0)
+            echo -n "${waitFor}... "
+            ;;
+        [6-9])
+            echo -n "${waitFor}.. "
+            ;;
+        [1-5])
+            echo -n "${waitFor}. "
+            ;;
+        esac
+        waitFor=$((waitFor - 1))
+        sleep 1s
+    done
+}
+

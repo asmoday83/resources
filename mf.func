@@ -1,0 +1,15 @@
+function mf() {
+  filecount=$(ls | wc -l)
+  if [[ ${filecount} -le 9 ]]
+    then
+      first="1"
+  elif [[ ${filecount} -le 99 ]]
+    then
+      first="01"
+  elif [[ ${filecount} -gt 99 ]]
+    then
+      first="001"
+  fi
+  for i in {${first}..$(ls | wc -l)} ; do ls *part*$i*.rar 2>&1 | awk -F \* '/cannot/ {print "part "$3" is missing"}'; done
+}
+

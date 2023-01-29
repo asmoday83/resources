@@ -1,0 +1,4 @@
+function rsrc() {
+  for f in ~/.resources/*; do source $f; done
+}
+
